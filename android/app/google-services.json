@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "152431525173",
+    "project_id": "magangku-a893a",
+    "storage_bucket": "magangku-a893a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:152431525173:android:3d71df6d4b7b5d47ca207c",
+        "android_client_info": {
+          "package_name": "com.example.magangku"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA66wJClH22vN73Nmm3dpSAwD68iFxPr2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
