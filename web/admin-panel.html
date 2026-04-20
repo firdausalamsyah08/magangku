@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MagangKu — Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161b24;
+      --surface2: #1e2535;
+      --border: #2a3347;
+      --accent: #3b82f6;
+      --accent2: #06d6a0;
+      --accent3: #f59e0b;
+      --danger: #ef4444;
+      --text: #e8edf5;
+      --muted: #6b7a99;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --transition: background .2s, color .2s, border-color .2s;
+    }
+    body.light {
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --surface2: #e8edf5;
+      --border: #d0d9e8;
+      --text: #1a2235;
+      --muted: #6b7a99;
+    }
+    body { transition: var(--transition); }
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--sans);
+      transition: all .2s;
+      display: flex; align-items: center; gap: 6px;
+      margin: 0 16px 12px;
+    }
+    .theme-toggle:hover { color: var(--text); border-color: var(--accent); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 60% 40%, #1a2a4a 0%, #0d0f14 70%);
+      transition: background .2s;
+    }
+    body.light #login-screen {
+      background: radial-gradient(ellipse at 60% 40%, #dbeafe 0%, #f0f4f8 70%);
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 380px;
+      box-shadow: 0 0 60px rgba(59,130,246,0.08);
+    }
+    .login-logo {
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--accent);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .login-sub { color: var(--muted); font-size: 13px; margin-bottom: 36px; }
+    .field-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+    .field-wrap { margin-bottom: 18px; }
+    .field-wrap input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .field-wrap input:focus { border-color: var(--accent); }
+    .btn-login {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 13px;
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 8px;
+    }
+    .btn-login:hover { opacity: .85; }
+    .btn-login:active { transform: scale(.98); }
+    #login-error { color: var(--danger); font-size: 12px; margin-top: 12px; text-align: center; min-height: 18px; }
+
+    /* ── LAYOUT ── */
+    #app { display: none; }
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0;
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 28px 0;
+      z-index: 10;
+    }
+    .sidebar-logo {
+      font-family: var(--mono);
+      font-size: 16px;
+      color: var(--accent);
+      padding: 0 24px 28px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.5px;
+    }
+    .sidebar-logo span { color: var(--muted); font-size: 11px; display: block; margin-top: 3px; font-family: var(--sans); }
+    .nav { margin-top: 20px; flex: 1; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 24px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all .15s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { color: var(--text); background: var(--surface2); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(59,130,246,0.07); }
+    .nav-icon { font-size: 16px; }
+    .sidebar-logout {
+      padding: 0 16px 4px;
+    }
+    .btn-logout {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 9px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: all .2s;
+    }
+    .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    .main {
+      margin-left: 220px;
+      padding: 36px 40px;
+      min-height: 100vh;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── HEADER ── */
+    .page-header { margin-bottom: 28px; }
+    .page-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+    .page-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+    /* ── STATS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .stat-card.blue::before { background: var(--accent); }
+    .stat-card.green::before { background: var(--accent2); }
+    .stat-card.amber::before { background: var(--accent3); }
+    .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+    .stat-value { font-family: var(--mono); font-size: 32px; margin-top: 8px; letter-spacing: -2px; }
+    .stat-value.blue { color: var(--accent); }
+    .stat-value.green { color: var(--accent2); }
+    .stat-value.amber { color: var(--accent3); }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .table-toolbar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .search-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--sans);
+      outline: none;
+      width: 240px;
+      transition: border-color .2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { border-bottom: 1px solid var(--border); }
+    th {
+      text-align: left;
+      padding: 12px 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    td { padding: 13px 20px; font-size: 13px; border-bottom: 1px solid rgba(42,51,71,0.5); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: var(--surface2); }
+    .avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+      margin-right: 10px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .name-cell { display: flex; align-items: center; }
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .chip-hadir { background: rgba(6,214,160,0.12); color: var(--accent2); }
+    .chip-tidak { background: rgba(239,68,68,0.12); color: var(--danger); }
+
+    /* ── LOADING / EMPTY ── */
+    .loading-row td { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── USER DETAIL MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 520px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 32px;
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .btn-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
+    .detail-row { display: flex; gap: 8px; margin-bottom: 12px; font-size: 13px; }
+    .detail-key { color: var(--muted); min-width: 110px; font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; padding-top: 1px; }
+    .detail-val { color: var(--text); }
+    .modal-section { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin: 20px 0 12px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .log-item { background: var(--surface2); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px; }
+    .log-date { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+    .log-text { margin-top: 4px; line-height: 1.5; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── SPINNER ── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">MagangKu</div>
+    <div class="login-sub">Admin Panel — masuk dengan akun admin</div>
+    <div class="field-wrap">
+      <div class="field-label">Email</div>
+      <input type="email" id="email" placeholder="admin@email.com"/>
+    </div>
+    <div class="field-wrap">
+      <div class="field-label">Password</div>
+      <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()">MASUK</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">MagangKu <span>Admin Panel</span></div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="showPage('mahasiswa')">
+        <span class="nav-icon">👤</span> Mahasiswa
+      </div>
+      <div class="nav-item" onclick="showPage('absensi')">
+        <span class="nav-icon">📅</span> Absensi
+      </div>
+      <div class="nav-item" onclick="showPage('logbook')">
+        <span class="nav-icon">📓</span> Logbook
+      </div>
+    </nav>
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">
+      <span id="theme-icon">☀️</span>
+      <span id="theme-label">Mode Terang</span>
+    </button>
+    <div class="sidebar-logout">
+      <button class="btn-logout" onclick="doLogout()">↩ Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- MAHASISWA -->
+    <div class="page active" id="page-mahasiswa">
+      <div class="page-header">
+        <div class="page-title">Data Mahasiswa</div>
+        <div class="page-sub">Semua pengguna yang terdaftar di MagangKu</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card blue">
+          <div class="stat-label">Total Mahasiswa</div>
+          <div class="stat-value blue" id="stat-total">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Hadir Hari Ini</div>
+          <div class="stat-value green" id="stat-hadir">—</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-label">Total Logbook</div>
+          <div class="stat-value amber" id="stat-logbook">—</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" id="search-mahasiswa" placeholder="🔍  Cari nama / NIM..." oninput="filterMahasiswa()"/>
+          <span class="badge" id="badge-mahasiswa">0 data</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>NIM</th>
+              <th>Prodi</th>
+              <th>Universitas</th>
+              <th>No. HP</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-mahasiswa">
+            <tr class="loading-row"><td colspan="6"><span class="spinner"></span>Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ABSENSI -->
+    <div class="page" id="page-absensi">
+      <div class="page-header">
+        <div class="page-title">Rekap Absensi</div>
+        <div class="page-sub">Riwayat absensi semua mahasiswa</div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" id="search-absensi" placeholder="🔍  Cari nama..." oninput="filterAbsensi()"/>
+          <span class="badge" id="badge-absensi">0 data</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Tanggal</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-absensi">
+            <tr class="loading-row"><td colspan="3"><span class="spinner"></span>Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LOGBOOK -->
+    <div class="page" id="page-logbook">
+      <div class="page-header">
+        <div class="page-title">Rekap Logbook</div>
+        <div class="page-sub">Catatan kegiatan semua mahasiswa</div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" id="search-logbook" placeholder="🔍  Cari nama / kegiatan..." oninput="filterLogbook()"/>
+          <span class="badge" id="badge-logbook">0 data</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Tanggal</th>
+              <th>Kegiatan</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-logbook">
+            <tr class="loading-row"><td colspan="3"><span class="spinner"></span>Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODAL DETAIL ══ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-name">Detail Mahasiswa</div>
+      <button class="btn-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ══ FIREBASE SDK ══ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  window.toggleTheme = () => {
+    const isLight = document.body.classList.toggle('light');
+    document.getElementById('theme-icon').textContent = isLight ? '🌙' : '☀️';
+    document.getElementById('theme-label').textContent = isLight ? 'Mode Gelap' : 'Mode Terang';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  };
+
+  // Restore saved theme
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('theme-icon').textContent = '🌙';
+    document.getElementById('theme-label').textContent = 'Mode Gelap';
+  }
+
+  // ── GANTI DENGAN CONFIG FIREBASE PROJECT MU ──
+  const firebaseConfig = {
+  apiKey: "AIzaSyCblmVMoqcmV6cj6bMKJP7_PQaR6gjunXw",
+  authDomain: "magangku-a893a.firebaseapp.com",
+  projectId: "magangku-a893a",
+  storageBucket: "magangku-a893a.firebasestorage.app",
+  messagingSenderId: "152431525173",
+  appId: "1:152431525173:web:506c4783221f4addca207c"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ── STATE ──
+  let allUsers = [];
+  let allAbsensi = [];
+  let allLogbook = [];
+
+  // ── AUTH STATE ──
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadAllData();
+    } else {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+    }
+  });
+
+  // ── LOGIN ──
+  window.doLogin = async () => {
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('password').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    if (!email || !pass) { errEl.textContent = 'Email dan password wajib diisi.'; return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+      errEl.textContent = 'Login gagal: ' + (e.message || 'Periksa email/password.');
+    }
+  };
+
+  // ── LOGOUT ──
+  window.doLogout = async () => { await signOut(auth); };
+
+  // ── LOAD ALL DATA ──
+  async function loadAllData() {
+    const usersSnap = await getDocs(collection(db, 'users'));
+    allUsers = [];
+    allAbsensi = [];
+    allLogbook = [];
+    let totalLogbook = 0;
+    let hadirHariIni = 0;
+    const today = new Date();
+    const todayStr = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
+
+    for (const userDoc of usersSnap.docs) {
+      const u = { uid: userDoc.id, ...userDoc.data() };
+      allUsers.push(u);
+
+      // Absensi
+      try {
+        const abSnap = await getDocs(
+          query(collection(db, 'users', u.uid, 'absensi'), orderBy('timestamp', 'desc'))
+        );
+        abSnap.forEach(d => {
+          const data = d.data();
+          allAbsensi.push({ nama: u.nama || '-', ...data });
+          if (data.tanggal === todayStr && data.status === 'Hadir') hadirHariIni++;
+        });
+      } catch(_) {}
+
+      // Logbook
+      try {
+        const lbSnap = await getDocs(
+          query(collection(db, 'users', u.uid, 'logbook'), orderBy('timestamp', 'desc'))
+        );
+        lbSnap.forEach(d => {
+          allLogbook.push({ nama: u.nama || '-', ...d.data() });
+          totalLogbook++;
+        });
+      } catch(_) {}
+    }
+
+    // Stats
+    document.getElementById('stat-total').textContent = allUsers.length;
+    document.getElementById('stat-hadir').textContent = hadirHariIni;
+    document.getElementById('stat-logbook').textContent = totalLogbook;
+
+    renderMahasiswa(allUsers);
+    renderAbsensi(allAbsensi);
+    renderLogbook(allLogbook);
+  }
+
+  // ── RENDER MAHASISWA ──
+  function renderMahasiswa(data) {
+    const tbody = document.getElementById('tbody-mahasiswa');
+    document.getElementById('badge-mahasiswa').textContent = data.length + ' data';
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📭</div><p>Tidak ada data</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(u => `
+      <tr>
+        <td><div class="name-cell">
+          <div class="avatar">${(u.nama||'?')[0].toUpperCase()}</div>
+          ${u.nama || '-'}
+        </div></td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${u.nim || '-'}</td>
+        <td>${u.prodi || '-'}</td>
+        <td>${u.universitas || '-'}</td>
+        <td>${u.noHp || '-'}</td>
+        <td><button onclick="showDetail('${u.uid}')"
+          style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:var(--accent);
+                 border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:var(--sans)">
+          Lihat ↗
+        </button></td>
+      </tr>
+    `).join('');
+  }
+
+  // ── RENDER ABSENSI ──
+  function renderAbsensi(data) {
+    const tbody = document.getElementById('tbody-absensi');
+    document.getElementById('badge-absensi').textContent = data.length + ' data';
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📭</div><p>Tidak ada data</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(a => `
+      <tr>
+        <td>${a.nama}</td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${a.tanggal || '-'}</td>
+        <td><span class="chip ${a.status==='Hadir'?'chip-hadir':'chip-tidak'}">${a.status}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  // ── RENDER LOGBOOK ──
+  function renderLogbook(data) {
+    const tbody = document.getElementById('tbody-logbook');
+    document.getElementById('badge-logbook').textContent = data.length + ' data';
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📭</div><p>Tidak ada data</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(l => `
+      <tr>
+        <td>${l.nama}</td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${l.tanggal || '-'}</td>
+        <td>${l.kegiatan || '-'}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ── FILTER ──
+  window.filterMahasiswa = () => {
+    const q = document.getElementById('search-mahasiswa').value.toLowerCase();
+    renderMahasiswa(allUsers.filter(u =>
+      (u.nama||'').toLowerCase().includes(q) || (u.nim||'').toLowerCase().includes(q)
+    ));
+  };
+  window.filterAbsensi = () => {
+    const q = document.getElementById('search-absensi').value.toLowerCase();
+    renderAbsensi(allAbsensi.filter(a => (a.nama||'').toLowerCase().includes(q)));
+  };
+  window.filterLogbook = () => {
+    const q = document.getElementById('search-logbook').value.toLowerCase();
+    renderLogbook(allLogbook.filter(l =>
+      (l.nama||'').toLowerCase().includes(q) || (l.kegiatan||'').toLowerCase().includes(q)
+    ));
+  };
+
+  // ── SHOW PAGE ──
+  window.showPage = (name) => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  };
+
+  // ── MODAL DETAIL ──
+  window.showDetail = (uid) => {
+    const u = allUsers.find(x => x.uid === uid);
+    if (!u) return;
+    document.getElementById('modal-name').textContent = u.nama || 'Detail';
+
+    const absensi = allAbsensi.filter(a => a.nama === u.nama);
+    const logbook = allLogbook.filter(l => l.nama === u.nama);
+
+    document.getElementById('modal-body').innerHTML = `
+      ${row('Nama', u.nama)}
+      ${row('NIM', u.nim)}
+      ${row('Prodi', u.prodi)}
+      ${row('Universitas', u.universitas)}
+      ${row('Email', u.email)}
+      ${row('No. HP', u.noHp)}
+
+      <div class="modal-section">Riwayat Absensi (${absensi.length})</div>
+      ${absensi.length === 0 ? '<p style="color:var(--muted);font-size:12px">Belum ada absensi</p>' :
+        absensi.slice(0,10).map(a => `
+          <div class="log-item">
+            <div class="log-date">${a.tanggal}</div>
+            <div class="log-text">
+              <span class="chip ${a.status==='Hadir'?'chip-hadir':'chip-tidak'}">${a.status}</span>
+            </div>
+          </div>
+        `).join('')}
+
+      <div class="modal-section">Riwayat Logbook (${logbook.length})</div>
+      ${logbook.length === 0 ? '<p style="color:var(--muted);font-size:12px">Belum ada logbook</p>' :
+        logbook.slice(0,10).map(l => `
+          <div class="log-item">
+            <div class="log-date">${l.tanggal}</div>
+            <div class="log-text">${l.kegiatan}</div>
+          </div>
+        `).join('')}
+    `;
+    document.getElementById('modal-overlay').classList.add('open');
+  };
+
+  function row(k, v) {
+    return `<div class="detail-row"><div class="detail-key">${k}</div><div class="detail-val">${v||'-'}</div></div>`;
+  }
+
+  window.closeModal = (e) => { if(e.target === document.getElementById('modal-overlay')) closeModalDirect(); };
+  window.closeModalDirect = () => { document.getElementById('modal-overlay').classList.remove('open'); };
+</script>
+</body>
+</html>
